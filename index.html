@@ -57,7 +57,7 @@
     <h1>艾默里克的欢迎</h1>
     <p>在下方输入名字并点击生成。</p>
     <div class="actions" style="flex-wrap: nowrap;">
-      <input id="textInput" type="text" placeholder="输入要叠加的文字" style="flex:1; min-width: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px;" />
+      <input id="textInput" type="text" placeholder="名字" style="flex:1; min-width: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px;" />
       <button id="generate" type="button">生成图片</button>
     </div>
     <img id="result" alt="生成的图片" />
@@ -80,8 +80,7 @@
       const downloadBtn = document.getElementById('download');
       const textInput = document.getElementById('textInput');
       const generateBtn = document.getElementById('generate');
-      let currentText = '冒险者';
-      textInput.value = currentText;
+      let currentText = '';
 
       function wrapText(ctx, text, maxWidth, spacing) {
         if (!text) return [''];
@@ -120,22 +119,20 @@
           canvas.height = img.height;
           ctx.drawImage(img, 0, 0, img.width, img.height);
 
-          if (currentText) {
-            const left = 180; // 指定左侧距离
-            const top = 522;  // 指定顶部距离
-            const letterSpacing = 2; // 增大字间距（像素）
-            ctx.font = '32px "youyou-yisong", sans-serif';
-            ctx.fillStyle = '#3a3a3a';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            const maxWidth = canvas.width - left * 2;
-            const lineHeight = 40; // 依据 30px 字号设置行高
-            const textToRender = currentText.endsWith('：') ? currentText : `${currentText}：`;
-            const lines = wrapText(ctx, textToRender, maxWidth, letterSpacing);
-            lines.forEach((line, i) => {
-              drawTextWithSpacing(ctx, line, left, top + i * lineHeight, letterSpacing);
-            });
-          }
+          const left = 180; // 指定左侧距离
+          const top = 522;  // 指定顶部距离
+          const letterSpacing = 2; // 增大字间距（像素）
+          ctx.font = '32px "youyou-yisong", sans-serif';
+          ctx.fillStyle = '#3a3a3a';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          const maxWidth = canvas.width - left * 2;
+          const lineHeight = 40; // 依据 30px 字号设置行高
+          const textToRender = `冒险者：${currentText}`;
+          const lines = wrapText(ctx, textToRender, maxWidth, letterSpacing);
+          lines.forEach((line, i) => {
+            drawTextWithSpacing(ctx, line, left, top + i * lineHeight, letterSpacing);
+          });
 
           const dataUrl = canvas.toDataURL('image/png');
           imgEl.src = dataUrl;
