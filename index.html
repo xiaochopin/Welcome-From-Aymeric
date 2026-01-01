@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>艾默里克的欢迎</title>
+  <style>
+    @import url("https://fontsapi.zeoseven.com/615/main/result.css");
+    :root { color-scheme: light; }
+    body {
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      align-items: flex-start; /* 顶部对齐 */
+      justify-content: center;
+      min-height: 100vh;
+      font-family: "youyou-yisong", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      font-weight: normal;
+      background: linear-gradient(135deg, #f5f7fb 0%, #e9eef5 100%);
+      color: #1f2933;
+    }
+    h1 { margin: 0 0 12px; font-size: 20px; font-weight: 700; }
+    p { margin: 0 0 16px; line-height: 1.5; }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      max-width: 720px;
+    }
+    #result {
+      margin: 1rem 0;
+      width: 100%;
+      max-width: 680px;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      background: #f0f2f6;
+    }
+    .actions { margin-top: 12px; display: flex; gap: 12px; align-items: center; }
+    button {
+      border: none;
+      background: #111827;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(17,24,39,0.2); }
+    button:active { transform: translateY(0); box-shadow: none; }
+    #status { font-size: 13px; color: #4b5563; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>艾默里克的欢迎</h1>
+    <p>在下方输入名字并点击生成。</p>
+    <div class="actions" style="flex-wrap: nowrap;">
+      <input id="textInput" type="text" placeholder="输入要叠加的文字" style="flex:1; min-width: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px;" />
+      <button id="generate" type="button">生成图片</button>
+    </div>
+    <img id="result" alt="生成的图片" />
+    <div class="actions">
+      <button id="download" type="button">下载图片</button>
+      <span id="status"></span>
+    </div>
+    <br>
+    <p>原图@茶伊</p>
+    <canvas id="canvas" style="display:none;"></canvas>
+  </div>
+
+  <script>
+    (function() {
+      const baseSrc = 'base.png';
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const imgEl = document.getElementById('result');
+      const statusEl = document.getElementById('status');
+      const downloadBtn = document.getElementById('download');
+      const textInput = document.getElementById('textInput');
+      const generateBtn = document.getElementById('generate');
+      let currentText = '冒险者';
+      textInput.value = currentText;
+
+      function wrapText(ctx, text, maxWidth, spacing) {
+        if (!text) return [''];
+        const words = text.split(/\s+/);
+        const lines = [];
+        let current = '';
+        for (const word of words) {
+          const next = current ? current + ' ' + word : word;
+          const widthWithSpacing = ctx.measureText(next).width + Math.max(next.length - 1, 0) * spacing;
+          if (widthWithSpacing <= maxWidth) {
+            current = next;
+          } else {
+            if (current) lines.push(current);
+            current = word;
+          }
+        }
+        if (current) lines.push(current);
+        return lines;
+      }
+
+      function drawTextWithSpacing(ctx, text, x, y, spacing) {
+        let offsetX = x;
+        for (let i = 0; i < text.length; i++) {
+          const ch = text[i];
+          ctx.fillText(ch, offsetX, y);
+          const w = ctx.measureText(ch).width;
+          offsetX += w + spacing;
+        }
+      }
+
+      function render() {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0, img.width, img.height);
+
+          if (currentText) {
+            const left = 180; // 指定左侧距离
+            const top = 522;  // 指定顶部距离
+            const letterSpacing = 2; // 增大字间距（像素）
+            ctx.font = '32px "youyou-yisong", sans-serif';
+            ctx.fillStyle = '#3a3a3a';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            const maxWidth = canvas.width - left * 2;
+            const lineHeight = 40; // 依据 30px 字号设置行高
+            const textToRender = currentText.endsWith('：') ? currentText : `${currentText}：`;
+            const lines = wrapText(ctx, textToRender, maxWidth, letterSpacing);
+            lines.forEach((line, i) => {
+              drawTextWithSpacing(ctx, line, left, top + i * lineHeight, letterSpacing);
+            });
+          }
+
+          const dataUrl = canvas.toDataURL('image/png');
+          imgEl.src = dataUrl;
+          downloadBtn.onclick = () => {
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = 'output.png';
+            a.click();
+          };
+          statusEl.textContent = currentText ? '已生成，右键或点击下载保存图片。' : '未输入文字，显示原始 base.png。';
+        };
+        img.onerror = () => {
+          statusEl.textContent = '加载 base.png 失败，请确认文件与 index.html 同目录且允许跨域访问。';
+        };
+        const cacheBust = baseSrc.includes('?') ? '&' : '?';
+        img.src = baseSrc + cacheBust + 't=' + Date.now();
+      }
+
+      generateBtn.onclick = () => {
+        currentText = (textInput.value || '').trim();
+        render();
+      };
+
+      textInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+          generateBtn.click();
+        }
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
