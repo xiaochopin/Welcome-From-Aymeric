@@ -72,7 +72,7 @@
 
   <script>
     (function() {
-      const baseSrc = 'base.png';
+      const baseSrc = 'https://xiaochopin.dpdns.org/Welcome-From-Aymeric/base.png';
       const canvas = document.getElementById('canvas');
       const ctx = canvas.getContext('2d');
       const imgEl = document.getElementById('result');
@@ -142,7 +142,7 @@
             a.download = 'output.png';
             a.click();
           };
-          statusEl.textContent = currentText ? '已生成，右键或点击下载保存图片。' : '未输入文字，显示原始 base.png。';
+          statusEl.textContent = currentText ? '已生成，右键或点击下载保存图片。' : '未输入文字。';
         };
         img.onerror = () => {
           statusEl.textContent = '加载 base.png 失败，请确认文件与 index.html 同目录且允许跨域访问。';
